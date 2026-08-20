@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar albergue | Mapa Vivo</title>
+    <link rel="stylesheet" href="{% static 'portal/css/portal.css' %}">
+</head>
+<body class="account-page">
+    <header class="simple-header"><a class="brand" href="{% url 'inicio' %}"><span>MV</span> Mapa Vivo</a><a class="back-link" href="{% url 'inicio' %}">← Volver al mapa</a></header>
+    <main class="registration-card">
+        <p class="eyebrow">SUMA TU PUNTO A LA RED</p>
+        <h1>Registrar albergue</h1>
+        <p class="lead">Crea el acceso del gestor y registra la ubicación del albergue. El punto será visible como pendiente de confirmación.</p>
+        <form method="post" class="registration-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <fieldset><legend>Acceso del gestor</legend>
+                <div class="field-grid">
+                    <div><label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>{{ form.username }}{{ form.username.errors }}</div>
+                    <div><label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>{{ form.email }}{{ form.email.errors }}</div>
+                    <div><label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>{{ form.password1 }}{{ form.password1.errors }}</div>
+                    <div><label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>{{ form.password2 }}{{ form.password2.errors }}</div>
+                </div>
+            </fieldset>
+            <fieldset><legend>Información del albergue</legend>
+                <div class="field-grid">
+                    <div class="full"><label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>{{ form.nombre }}{{ form.nombre.errors }}</div>
+                    <div class="full"><label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>{{ form.descripcion }}{{ form.descripcion.errors }}</div>
+                    <div><label for="{{ form.ciudad.id_for_label }}">{{ form.ciudad.label }}</label>{{ form.ciudad }}{{ form.ciudad.errors }}</div>
+                    <div><label for="{{ form.poblacion_vulnerable.id_for_label }}">{{ form.poblacion_vulnerable.label }}</label>{{ form.poblacion_vulnerable }}{{ form.poblacion_vulnerable.errors }}</div>
+                    <div class="full"><label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>{{ form.direccion }}{{ form.direccion.errors }}</div>
+                    <div><label for="{{ form.barrio.id_for_label }}">{{ form.barrio.label }}</label>{{ form.barrio }}{{ form.barrio.errors }}</div>
+                    <div><label for="{{ form.comuna.id_for_label }}">{{ form.comuna.label }}</label>{{ form.comuna }}{{ form.comuna.errors }}</div>
+                    <div><label for="{{ form.latitud.id_for_label }}">{{ form.latitud.label }}</label>{{ form.latitud }}{{ form.latitud.errors }}</div>
+                    <div><label for="{{ form.longitud.id_for_label }}">{{ form.longitud.label }}</label>{{ form.longitud }}{{ form.longitud.errors }}</div>
+                    <div><label for="{{ form.nombre_contacto.id_for_label }}">{{ form.nombre_contacto.label }}</label>{{ form.nombre_contacto }}{{ form.nombre_contacto.errors }}</div>
+                    <div><label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>{{ form.telefono }}{{ form.telefono.errors }}</div>
+                </div>
+            </fieldset>
+            <button class="button button-primary" type="submit">Crear cuenta y registrar albergue</button>
+        </form>
+    </main>
+</body>
+</html>

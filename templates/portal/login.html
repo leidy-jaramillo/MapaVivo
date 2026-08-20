@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Mapa Vivo</title>
+    <link rel="stylesheet" href="{% static 'portal/css/portal.css' %}">
+</head>
+<body class="account-page">
+    <header class="simple-header"><a class="brand" href="{% url 'inicio' %}"><span>MV</span> Mapa Vivo</a></header>
+    <main class="account-card">
+        <p class="eyebrow">ACCESO A LA PLATAFORMA</p>
+        <h1>Iniciar sesión</h1>
+        <p class="lead">Ingresa para gestionar la información de tu albergue.</p>
+        <form method="post" class="account-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <label for="id_username">Usuario</label>{{ form.username }}
+            <label for="id_password">Contraseña</label>{{ form.password }}
+            <button class="button button-primary" type="submit">Ingresar</button>
+        </form>
+        <p class="account-footer">¿Representas un albergue? <a href="{% url 'registro_punto' %}">Registra un punto aquí</a>.</p>
+    </main>
+</body>
+</html>

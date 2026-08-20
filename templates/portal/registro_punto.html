@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar punto | Mapa Vivo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="{% static 'portal/css/portal.css' %}">
+</head>
+<body class="account-page">
+    <header class="simple-header"><a class="brand" href="{% url 'inicio' %}"><span>MV</span> Mapa Vivo</a><a class="back-link" href="{% url 'inicio' %}">← Volver al mapa</a></header>
+    <main class="registration-card">
+        <p class="eyebrow">SUMA TU PUNTO A LA RED</p>
+        <h1>{% if modo_edicion %}Editar punto de apoyo{% else %}Registrar punto de apoyo{% endif %}</h1>
+        <p class="lead">Crea el acceso del gestor, selecciona el tipo de punto y marca su ubicación exacta en el mapa. El registro quedará pendiente de confirmación.</p>
+        <form method="post" class="registration-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            {% if crear_cuenta %}<fieldset><legend>Acceso del gestor</legend>
+                <div class="field-grid">
+                    <div><label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>{{ form.username }}{{ form.username.errors }}</div>
+                    <div><label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>{{ form.email }}{{ form.email.errors }}</div>
+                    <div><label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>{{ form.password1 }}{{ form.password1.errors }}</div>
+                    <div><label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>{{ form.password2 }}{{ form.password2.errors }}</div>
+                </div>
+            </fieldset>{% endif %}
+            <fieldset><legend>Información del punto</legend>
+                <div class="field-grid">
+                    <div><label for="{{ form.tipo_punto.id_for_label }}">{{ form.tipo_punto.label }}</label>{{ form.tipo_punto }}{{ form.tipo_punto.errors }}</div>
+                    <div><label for="{{ form.ciudad.id_for_label }}">{{ form.ciudad.label }}</label>{{ form.ciudad }}{{ form.ciudad.errors }}</div>
+                    <div class="full"><label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>{{ form.nombre }}{{ form.nombre.errors }}</div>
+                    <div class="full"><label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>{{ form.descripcion }}{{ form.descripcion.errors }}</div>
+                    <div><label for="{{ form.poblacion_vulnerable.id_for_label }}">{{ form.poblacion_vulnerable.label }}</label>{{ form.poblacion_vulnerable }}{{ form.poblacion_vulnerable.errors }}</div>
+                    <div><label for="{{ form.poblacion_total.id_for_label }}">{{ form.poblacion_total.label }} <small>(opcional)</small></label>{{ form.poblacion_total }}{{ form.poblacion_total.errors }}</div>
+                    <div><label for="{{ form.comuna.id_for_label }}">{{ form.comuna.label }}</label>{{ form.comuna }}{{ form.comuna.errors }}</div>
+                    <div class="full"><label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>{{ form.direccion }}{{ form.direccion.errors }}</div>
+                    <div><label for="{{ form.barrio.id_for_label }}">{{ form.barrio.label }}</label>{{ form.barrio }}{{ form.barrio.errors }}</div>
+                    <div><label for="{{ form.nombre_contacto.id_for_label }}">{{ form.nombre_contacto.label }}</label>{{ form.nombre_contacto }}{{ form.nombre_contacto.errors }}</div>
+                    <div><label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>{{ form.telefono }}{{ form.telefono.errors }}</div>
+                    <div class="full"><label>Ubicación del punto</label><p class="map-help">Haz clic sobre el mapa para seleccionar latitud y longitud.</p><div id="location-map" class="location-map"></div></div>
+                    <div><label for="{{ form.latitud.id_for_label }}">{{ form.latitud.label }}</label>{{ form.latitud }}{{ form.latitud.errors }}</div>
+                    <div><label for="{{ form.longitud.id_for_label }}">{{ form.longitud.label }}</label>{{ form.longitud }}{{ form.longitud.errors }}</div>
+                </div>
+            </fieldset>
+            <button class="button button-primary" type="submit">{% if modo_edicion %}Guardar cambios{% elif crear_cuenta %}Crear cuenta y registrar punto{% else %}Registrar punto{% endif %}</button>
+        </form>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const latitud = document.getElementById('{{ form.latitud.id_for_label }}');
+        const longitud = document.getElementById('{{ form.longitud.id_for_label }}');
+        const locationMap = L.map('location-map').setView([3.4516, -76.5320], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(locationMap);
+        let marker;
+        function seleccionarUbicacion(lat, lng) {
+            latitud.value = Number(lat).toFixed(6);
+            longitud.value = Number(lng).toFixed(6);
+            if (marker) marker.setLatLng([lat, lng]); else marker = L.marker([lat, lng]).addTo(locationMap);
+        }
+        locationMap.on('click', event => seleccionarUbicacion(event.latlng.lat, event.latlng.lng));
+        if (latitud.value && longitud.value) seleccionarUbicacion(latitud.value, longitud.value);
+    </script>
+</body>
+</html>

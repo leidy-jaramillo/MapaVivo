@@ -1,0 +1,132 @@
+:root {
+    --primary: #5c146c;
+    --primary-dark: #3e0843;
+    --primary-soft: #a592a0;
+    --accent: #efb24d;
+    --surface: #ffffff;
+    --page: #f4f7f6;
+    --text: #382631;
+}
+
+body {
+    background: var(--page);
+    color: var(--text);
+}
+
+#header {
+    background: linear-gradient(115deg, var(--primary-dark), var(--primary));
+    box-shadow: 0 2px 8px rgba(78, 13, 67, 0.22);
+}
+
+#site-name a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.brand-mark {
+    display: inline-grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+#user-tools a:focus,
+#user-tools a:hover,
+#site-name a:focus,
+#site-name a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+#content {
+    padding-top: 28px;
+}
+
+.module,
+.inline-group {
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 3px 12px rgba(27, 52, 47, .08);
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-weight: 700;
+}
+
+div.breadcrumbs {
+    background: #e0ece8;
+    color: #31544d;
+}
+
+div.breadcrumbs a {
+    color: var(--primary-dark);
+}
+
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button {
+    border-radius: 7px;
+    background: var(--primary);
+    font-weight: 600;
+}
+
+.button.default,
+input[type=submit].default,
+.submit-row input.default {
+    background: var(--primary-dark);
+}
+
+.button:hover,
+input[type=submit]:hover,
+input[type=button]:hover,
+.submit-row input:hover,
+a.button:hover {
+    background: #0b594c;
+}
+
+#changelist-filter {
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: 0 3px 12px rgba(27, 52, 47, .08);
+}
+
+#changelist-filter h2 {
+    background: var(--primary);
+    color: #fff;
+}
+
+a:link,
+a:visited {
+    color: var(--primary);
+}
+
+.selector-chosen h2 {
+    background: var(--primary) !important;
+}
+
+ol.breadcrumbs {
+    background: var(--primary-soft);
+}
+
+@media (max-width: 767px) {
+    #site-name a {
+        font-size: 16px;
+    }
+}

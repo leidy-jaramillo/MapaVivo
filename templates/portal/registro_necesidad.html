@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Registrar necesidad | Mapa Vivo</title><link rel="stylesheet" href="{% static 'portal/css/portal.css' %}"></head>
+<body class="account-page"><header class="simple-header"><a class="brand" href="{% url 'inicio' %}"><span>MV</span> Mapa Vivo</a><a class="back-link" href="{% url 'perfil' %}">← Volver al perfil</a></header>
+<main class="account-card need-card"><p class="eyebrow">REPORTE DE NECESIDAD</p><h1>Registrar necesidad</h1><p class="lead">Selecciona uno de tus puntos y describe la ayuda requerida.</p><form method="post" class="account-form">{% csrf_token %}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}<label for="{{ form.punto.id_for_label }}">{{ form.punto.label }}</label>{{ form.punto }}{{ form.punto.errors }}<label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>{{ form.categoria }}{{ form.categoria.errors }}<label for="{{ form.subcategoria.id_for_label }}">{{ form.subcategoria.label }}</label>{{ form.subcategoria }}{{ form.subcategoria.errors }}<label for="{{ form.necesidad_texto.id_for_label }}">{{ form.necesidad_texto.label }}</label>{{ form.necesidad_texto }}{{ form.necesidad_texto.errors }}<label for="{{ form.observacion.id_for_label }}">{{ form.observacion.label }}</label>{{ form.observacion }}{{ form.observacion.errors }}<button class="button button-primary" type="submit">Guardar necesidad</button></form></main>
+<script>
+    const categoria = document.getElementById('{{ form.categoria.id_for_label }}');
+    const subcategoria = document.getElementById('{{ form.subcategoria.id_for_label }}');
+    const subcategoriaInicial = subcategoria.value;
+
+    async function actualizarSubcategorias() {
+        const categoriaId = categoria.value;
+        subcategoria.innerHTML = '<option value="">Selecciona una subcategoría</option>';
+        subcategoria.disabled = !categoriaId;
+        if (!categoriaId) return;
+        const respuesta = await fetch(`/api/categorias/${categoriaId}/subcategorias/`);
+        const datos = await respuesta.json();
+        datos.subcategorias.forEach(item => {
+            const opcion = new Option(item.nombre, item.id, false, String(item.id) === subcategoriaInicial);
+            subcategoria.add(opcion);
+        });
+    }
+    categoria.addEventListener('change', () => { subcategoria.value = ''; actualizarSubcategorias(); });
+    actualizarSubcategorias();
+</script>
+</body></html>

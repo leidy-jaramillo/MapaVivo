@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Vivo | Puntos de apoyo</title>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="{% static 'portal/css/portal.css' %}">
+</head>
+<body class="map-page">
+    <header class="topbar">
+        <a class="brand" href="{% url 'inicio' %}"><span>MV</span> Mapa Vivo</a>
+        <nav aria-label="Navegación principal">
+            <a href="#puntos">Puntos</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'perfil' %}">Mi perfil</a>{% if user.is_staff %}<a href="{% url 'admin:index' %}">Administración</a>{% endif %}
+                <form class="logout-form" action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar sesión</a>
+
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <div id="map" aria-label="Mapa de puntos de apoyo registrados"></div>
+
+        <section class="map-intro panel" aria-labelledby="titulo-mapa">
+            <p class="eyebrow">RED DE APOYO HUMANITARIO</p>
+            <h1 id="titulo-mapa">Puntos de apoyo disponibles</h1>
+            <p>Encuentra albergues, centros de acopio, puntos de rescate y las necesidades que aún requieren apoyo.</p>
+            <a class="button button-primary" href="{% url 'registro_punto' %}">Registrar un punto</a>
+        </section>
+
+        <aside class="shelters-panel panel" id="puntos" aria-labelledby="titulo-puntos">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">PUNTOS ACTIVOS</p>
+                    <h2 id="titulo-puntos">Puntos de apoyo</h2>
+                </div>
+                <span class="count" id="shelter-count"></span>
+            </div>
+            <div id="shelter-list" class="shelter-list"></div>
+        </aside>
+    </main>
+<div class="need-modal" id="need-modal" hidden><div class="need-modal-card" role="dialog" aria-modal="true" aria-labelledby="need-modal-title"><button class="modal-close" id="modal-close" type="button" aria-label="Cerrar">×</button><p class="eyebrow" id="need-category"></p><h2 id="need-modal-title"></h2><p class="need-detail" id="need-description"></p><div class="need-observation"><strong>Observación</strong><p id="need-observation"></p></div><div class="need-modal-meta"><span id="need-status"></span><span id="need-date"></span></div></div></div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+        </div>
+    {% endif %}
+
+    {{ puntos_mapa|json_script:'puntos-mapa-data' }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const puntos = JSON.parse(document.getElementById('puntos-mapa-data').textContent);
+        const map = L.map('map', { zoomControl: false }).setView([3.4516, -76.5320], 12);
+        L.control.zoom({ position: 'bottomleft' }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[char]);
+        const list = document.getElementById('shelter-list');
+        document.getElementById('shelter-count').textContent = puntos.length;
+
+        if (!puntos.length) {
+            list.innerHTML = '<p class="empty-state">Aún no hay puntos registrados. Registra uno para hacerlo visible.</p>';
+        }
+
+        const bounds = [];
+        puntos.forEach((punto, puntoIndex) => {
+            const necesidades = punto.necesidades.length
+                ? punto.necesidades.map((necesidad, needIndex) => `<button type="button" class="need-detail-link" data-punto="${puntoIndex}" data-need="${needIndex}">${escapeHtml(necesidad.subcategoria)}</button>`).join('')
+                : '<span>Sin necesidades activas reportadas</span>';
+            const direccion = [punto.direccion, punto.barrio].filter(Boolean).map(escapeHtml).join(', ');
+            const badgeClass = punto.estado === 'Confirmado' ? 'confirmed' : 'pending';
+            const marker = L.marker([punto.latitud, punto.longitud]).addTo(map);
+            marker.bindPopup(`
+                <article class="map-popup">
+                    <p class="popup-city">${escapeHtml(punto.tipo)} · ${escapeHtml(punto.ciudad)}</p>
+                    <h3>${escapeHtml(punto.nombre)}</h3>
+                    <p>📍 ${direccion || 'Dirección no reportada'}</p>
+                    <span class="status ${badgeClass}">${escapeHtml(punto.estado)}</span>
+                    <div class="needs"><strong>Necesidades activas</strong><div class="need-links">${necesidades}</div></div>
+                </article>
+            `);
+            bounds.push([punto.latitud, punto.longitud]);
+
+            const card = document.createElement('button');
+            card.className = 'shelter-card';
+            card.type = 'button';
+            card.innerHTML = `<span class="point-type">${escapeHtml(punto.tipo)}</span><span class="status ${badgeClass}">${escapeHtml(punto.estado)}</span><h3>${escapeHtml(punto.nombre)}</h3><p>${direccion || 'Dirección no reportada'}</p><small>${punto.necesidades.length} necesidad(es) activa(s)</small>`;
+            card.addEventListener('click', () => {
+                map.setView([punto.latitud, punto.longitud], 16);
+                marker.openPopup();
+            });
+            list.appendChild(card);
+        });
+
+        if (bounds.length > 1) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+        if (bounds.length === 1) map.setView(bounds[0], 15);
+
+        const modal = document.getElementById('need-modal');
+        document.addEventListener('click', event => {
+            const link = event.target.closest('.need-detail-link');
+            if (!link) return;
+            const necesidad = puntos[link.dataset.punto].necesidades[link.dataset.need];
+            document.getElementById('need-category').textContent = necesidad.categoria;
+            document.getElementById('need-modal-title').textContent = necesidad.subcategoria;
+            document.getElementById('need-description').textContent = necesidad.detalle;
+            document.getElementById('need-observation').textContent = necesidad.observacion || 'Sin observaciones registradas.';
+            document.getElementById('need-status').textContent = necesidad.estado;
+            document.getElementById('need-date').textContent = necesidad.fecha;
+            modal.hidden = false;
+        });
+        document.getElementById('modal-close').addEventListener('click', () => modal.hidden = true);
+        modal.addEventListener('click', event => { if (event.target === modal) modal.hidden = true; });
+    </script>
+</body>
+</html>
